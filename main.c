@@ -18,7 +18,7 @@
 #include <getopt.h>
 
 #ifndef VERSION
-#define VERSION "unknown"
+#define VERSION "unknown/fork"
 #endif
 
 #define NUM_PLAYERS 10
@@ -31,6 +31,12 @@
 #ifndef MOVEMENT_NOTIFICATIONS
 #define MOVEMENT_NOTIFICATIONS 1
 #endif
+/*
+ * Map header files
+ */
+#include <"maps/skeld.h">
+//#include <"maps/polus.h"> //TODO: make these functional
+//#include <"maps/mira.h">
 
 enum game_stage {
 	STAGE_LOBBY,
