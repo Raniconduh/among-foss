@@ -34,9 +34,9 @@
 /*
  * Map header files
  */
-#include <"maps/skeld.h">
-//#include <"maps/polus.h"> //TODO: make these functional
-//#include <"maps/mira.h">
+#include "maps/skeld.h"
+//#include "maps/polus.h" //TODO: make these functional
+//#include "maps/mira.h"
 
 enum game_stage {
 	STAGE_LOBBY,
