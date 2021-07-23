@@ -35,9 +35,8 @@
  * Map header files
  */
 #include "maps/skeld.h"
-//#include <"maps/polus.h"> //TODO: make these functional
-//#include <"maps/mira.h">
-
+//#include "maps/polus.h" //TODO: make these functional
+//#include "maps/mira.h"
 
 // hack for auto-skeld
 map = skeld_map

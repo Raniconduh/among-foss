@@ -2,28 +2,6 @@
 
 A recreation of Among Us mechanics but as a multiplayer text adventure game instead of a graphical client.
 
-```
-|\----------------|--------------|----------------|--------------\
-|                                                                 \
-| UPPER ENGINE                        CAFETERIA       WEAPONS      \
-|                 |-     --------|                |                 \
-|/--------|    |--|       MEDBAY |                |                  \
-          |    |                 |                |                   \------\
-/---------|    |-------\         |                |----------|        |       \
-|         |    |        \        |---|     |------|          |                 |
-|                        \       |                |                            |
-| REACTOR        SECURITY |      |  ADMIN OFFICE  |   O2           NAVIGATION  |
-|                         |      |                |          |                 |
-|         |    |          |      |---|     |----|-|----------|                 |
-\---------|    |----------|------|              |                     |       /
-          |    |                 |                                    /------/
-|\--------|    |--|              |                                   /
-|                 |              |              |--    --|          /
-| LOWER ENGINE       ELECTRICAL       STORAGE   | COMMS  | SHIELDS /
-|                                               |        |        /
-|/----------------|--------------|--------------|--------|-------/
-```
-
 ## Building
 
 ```shell-session
@@ -74,6 +52,3 @@ After everyone has voted either the game moves directly back to the playing stag
 
 The crew can win by having everyone complete all the tasks or by voting out the imposter. The imposter can win by killing all the crew or by making the crew vote out all their crewmates.
 
-# Development
-
-There's #among-sus on libera.chat. Patches go to https://lists.sr.ht/~martijnbraam/public-inbox
