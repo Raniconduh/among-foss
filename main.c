@@ -34,9 +34,24 @@
 /*
  * Map header files
  */
-#include <"maps/skeld.h">
+#include "maps/skeld.h"
 //#include <"maps/polus.h"> //TODO: make these functional
 //#include <"maps/mira.h">
+
+
+// hack for auto-skeld
+map = skeld_map
+
+player_task_short = skeld_player_task_short
+player_short_task_descriptions = skeld_short_task_descriptions
+
+player_task_long = skeld_player_task_long
+long_task_descriptions = skeld_long_task_descriptions
+
+player_location = skeld_player_location
+locations = skeld_locations
+//i do not think the vertice enum can be called like this
+descriptions = skeld_descriptions 
 
 enum game_stage {
 	STAGE_LOBBY,
@@ -826,7 +841,7 @@ void adventure(size_t pid, char *input) {
 				snprintf(buf, sizeof(buf), "\n# ");
 				break;
 		}
-	} else if (strncmp(input, "map", 3) == 0) {
+	} else if (strncmp(input, "map", 3) == 0) {//TODO: set map
 		write(players[pid].fd, map, strlen(map));
 		snprintf(buf, sizeof(buf), "# ");
 	} else {
@@ -1102,7 +1117,7 @@ int handle_input(int fd) {
 		case PLAYER_STAGE_LOBBY:
 			// Chat message in the lobby
 			if (buf[0] == '/') {
-				if (strcmp(buf, "/start") == 0) {
+				if (strcmp(buf, "/start") == 0) {//TODO: set map
 					if(players[pid].is_admin) {
 						start_game();
 					} else {

@@ -2,7 +2,7 @@
  * Header file for the Skeld Map of  Among-Sus
  */
 
-const char map[] =
+const char skeld_map[] =
 	"|\\----------------|--------------|----------------|--------------\\\n"
 	"|                                                                 \\\n"
 	"| UPPER ENGINE                        CAFETERIA       WEAPONS      \\\n"
@@ -25,7 +25,7 @@ const char map[] =
 ;
 
 
-enum player_task_short {
+enum skeld_player_task_short {
 	TASK_CAFE_TRASH,
 	TASK_CAFE_COFFEE,
 	TASK_CAFE_WIRES,
@@ -53,7 +53,7 @@ enum player_task_short {
 	TASK_SHORT_COUNT,
 };
 
-const char short_task_descriptions[][45] = {
+const char skeld_short_task_descriptions[][45] = {
 	"Empty the cafeteria trash",
 	"Start the coffee maker in the cafeteria",
 	"Fix wiring in cafeteria",
@@ -80,7 +80,7 @@ const char short_task_descriptions[][45] = {
 	"Replace compression coil in lower engine",
 };
 
-enum player_task_long {
+enum skeld_player_task_long {
 	TASK_SHIELDS_POWER,
 	TASK_WEAPONS_POWER,
 	TASK_NAV_LOG,
@@ -90,7 +90,7 @@ enum player_task_long {
 	TASK_LONG_COUNT
 };
 
-const char long_task_descriptions[][2][45] = {
+const char skeld_long_task_descriptions[][2][45] = {
 	{"Route power to defence in electrical", "Accept rerouted power in shields"},
 	{"Route power to attack in electrical", "Accept rerouted power in weapons"},
 	{"Download the latest navigation data", "Upload data in admin"},
@@ -100,7 +100,7 @@ const char long_task_descriptions[][2][45] = {
 	{"Get radio log from communications", "Deliver communications log to admin"},
 };
 
-enum player_location {
+enum skeld_player_location {
 	LOC_CAFETERIA,
 	LOC_REACTOR,
 	LOC_UPPER_ENGINE,
@@ -118,7 +118,7 @@ enum player_location {
 	LOC_COUNT,
 };
 
-const char locations[][45] = {
+const char skeld_locations[][45] = {
 	[LOC_CAFETERIA] = "cafeteria",
 	[LOC_REACTOR] = "reactor",
 	[LOC_UPPER_ENGINE] = "upper",
@@ -135,24 +135,92 @@ const char locations[][45] = {
 	[LOC_NAVIGATION] = "navigation",
 };
 
-enum player_location doors[][10] = {
-	[LOC_CAFETERIA] = { LOC_MEDBAY, LOC_ADMIN, LOC_WEAPONS, LOC_COUNT },
-	[LOC_REACTOR] = { LOC_UPPER_ENGINE, LOC_SECURITY, LOC_LOWER_ENGINE, LOC_COUNT },
-	[LOC_UPPER_ENGINE] = { LOC_REACTOR, LOC_SECURITY, LOC_MEDBAY, LOC_COUNT },
-	[LOC_LOWER_ENGINE] = { LOC_REACTOR, LOC_SECURITY, LOC_ELECTRICAL, LOC_COUNT },
-	[LOC_SECURITY] = { LOC_UPPER_ENGINE, LOC_REACTOR, LOC_LOWER_ENGINE, LOC_COUNT },
-	[LOC_MEDBAY] = { LOC_UPPER_ENGINE, LOC_CAFETERIA, LOC_COUNT },
-	[LOC_ELECTRICAL] = { LOC_LOWER_ENGINE, LOC_STORAGE, LOC_COUNT },
-	[LOC_STORAGE] = { LOC_ELECTRICAL, LOC_ADMIN, LOC_COMMUNICATIONS, LOC_SHIELDS, LOC_COUNT },
-	[LOC_ADMIN] = { LOC_CAFETERIA, LOC_STORAGE, LOC_COUNT },
-	[LOC_COMMUNICATIONS] = { LOC_STORAGE, LOC_SHIELDS, LOC_COUNT },
-	[LOC_O2] = { LOC_SHIELDS, LOC_WEAPONS, LOC_NAVIGATION, LOC_COUNT },
-	[LOC_WEAPONS] = { LOC_CAFETERIA, LOC_O2, LOC_NAVIGATION, LOC_COUNT },
-	[LOC_SHIELDS] = { LOC_STORAGE, LOC_COMMUNICATIONS, LOC_O2, LOC_NAVIGATION, LOC_COUNT },
-	[LOC_NAVIGATION] = { LOC_WEAPONS, LOC_O2, LOC_SHIELDS, LOC_COUNT },
+enum skeld_player_location doors[][10] = {
+	[LOC_CAFETERIA]     = { 
+                          LOC_MEDBAY, 
+                          LOC_ADMIN,
+                          LOC_WEAPONS,
+                          LOC_COUNT 
+                        },
+	[LOC_REACTOR]       = { 
+                          LOC_UPPER_ENGINE, 
+                          LOC_SECURITY, 
+                          LOC_LOWER_ENGINE, 
+                          LOC_COUNT 
+                        },
+	[LOC_UPPER_ENGINE]  = { 
+                          LOC_REACTOR, 
+                          LOC_SECURITY, 
+                          LOC_MEDBAY, 
+                          LOC_COUNT 
+                        },
+	[LOC_LOWER_ENGINE]  = { 
+                          LOC_REACTOR, 
+                          LOC_SECURITY, 
+                          LOC_ELECTRICAL, 
+                          LOC_COUNT 
+                         },
+	[LOC_SECURITY]       = { 
+                          LOC_UPPER_ENGINE,
+                          LOC_REACTOR, 
+                          LOC_LOWER_ENGINE, 
+                          LOC_COUNT 
+                         },
+	[LOC_MEDBAY]         = { 
+                          LOC_UPPER_ENGINE, 
+                          LOC_CAFETERIA, 
+                          LOC_COUNT 
+                         },
+	[LOC_ELECTRICAL]     = { 
+                          LOC_LOWER_ENGINE, 
+                          LOC_STORAGE,
+                          LOC_COUNT 
+                         },
+	[LOC_STORAGE]        = { 
+                          LOC_ELECTRICAL, 
+                          LOC_ADMIN, 
+                          LOC_COMMUNICATIONS, 
+                          LOC_SHIELDS, 
+                          LOC_COUNT 
+                         },
+	[LOC_ADMIN]          = { 
+                          LOC_CAFETERIA,
+                          LOC_STORAGE, 
+                          LOC_COUNT 
+                         },
+	[LOC_COMMUNICATIONS] = { 
+                          LOC_STORAGE, 
+                          LOC_SHIELDS, 
+                          LOC_COUNT
+                         },
+	[LOC_O2]             = { 
+                          LOC_SHIELDS, 
+                          LOC_WEAPONS, 
+                          LOC_NAVIGATION, 
+                          LOC_COUNT 
+                         },
+	[LOC_WEAPONS]        = { 
+                          LOC_CAFETERIA, 
+                          LOC_O2, 
+                          LOC_NAVIGATION, 
+                          LOC_COUNT
+                         },
+	[LOC_SHIELDS]        = { 
+                          LOC_STORAGE, 
+                          LOC_COMMUNICATIONS, 
+                          LOC_O2, 
+                          LOC_NAVIGATION, 
+                          LOC_COUNT 
+                         },
+	[LOC_NAVIGATION]     = { 
+                          LOC_WEAPONS, 
+                          LOC_O2, 
+                          LOC_SHIELDS, 
+                          LOC_COUNT 
+                         },
 };
 
-const char descriptions[][256] = {
+const char skeld_descriptions[][256] = {
 	[LOC_CAFETERIA] = "You are standing in the middle of the cafeteria, in the center there's an emergency button\n",
 	[LOC_REACTOR] = "You are in the reactor room, it seems to be running normally\n",
 	[LOC_UPPER_ENGINE] = "You are in a small room, mostly filled up by an engine.\n",
