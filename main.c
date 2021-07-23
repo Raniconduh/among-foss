@@ -38,7 +38,6 @@
 //#include "maps/polus.h" //TODO: make these functional
 //#include "maps/mira.h"
 
-
 // hack for auto-skeld
 map = skeld_map
 
