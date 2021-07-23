@@ -264,14 +264,7 @@ fd_set rfds, afds;
 int
 random_num(int upper_bound)
 {
-	int ret;
-
-	do {
-		ret = rand();
-	} while (ret >= (RAND_MAX - RAND_MAX % upper_bound));
-
-	ret %= upper_bound;
-	return ret;
+	return rand() % (upper_bound + 1);
 }
 
 int
