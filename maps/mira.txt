@@ -1,0 +1,77 @@
+MIRA HQ
+
+
+                    /----------\
+                   / GREENHOUSE \
+                   |             |
+                   |-|-|    |--|-|
+                     |         |------|
+                     | OFFICE   ADMIN |
+                     |         |------|
+                     |-|    |--| 
+    |-------|------| |         |
+    |         LAB  | |         |
+    |       |------| |    C    |
+    |REACTOR|--------|    O    |----------------|
+    |         DECOM       R                     |
+    |-------|--------|    R    |  CAFETERIA     |
+/---------------\    |    I    |                |
+|               |    |    D    |-|    |--|    |-|
+|   LAUNCHPAD   |`   |    O    | STORAGE |      |
+|               |    |    R    |---------|      |
+|               |    |         |    BALCONY     |
+\-------|    |--/    |-|     |-|----------------|
+        |    |       |  COMMS  |
+        |    |-------|-|     |-|
+        |              MEDBAY  |
+        \------------|---------|
+
+enum struct player_location_mira doors[][] = { 
+        [LOC_LAUNCHPAD] = { LOC_MEDBAY, LOC_COUNT },
+        [LOC_MEDBAY]    = {
+                            LOC_LAUNCHPAD,
+                            LOC_COMMS
+                            LOC_COUNT
+                          },
+        [LOC_COMMS]     = {
+                            LOC_MEDBAY,
+                            LOC_CORRIDOR,
+                            LOC_COUNT
+                          },
+        [LOC_CORRIDOR]  = {
+                            LOC_COMMS,
+                            LOC_CAFETERIA,
+                            LOC_DECOM,
+                            LOC_OFFICE,
+                            LOC_COUNT
+                          },
+
+        [LOC_CAFETERIA] = {
+                            LOC_CORRIDOR,
+                            LOC_STORAGE,
+                            LOC_BALCONY,
+                            LOC_COUNT
+                          },
+        [LOC_STORAGE]   = { LOC_CAFETERIA, LOC_COUNT },
+        [LOC_BALCONY]   = { LOC_CAFETERIA, LOC_COUNT },
+
+        [LOC_DECOM]     = { 
+                            LOC_CORRDIOR,
+                            LOC_REACTOR,
+                            LOC_COUNT
+                          },
+        [LOC_REACTOR]   = {
+                            LOC_DECOM,
+                            LOC_LAB,
+                            LOC_COUNT
+                          },
+        [LOC_LAB]       = { LOC_REACTOR, LOC_COUNT },
+
+        [LOC_OFFICE]    = { 
+                            LOC_GREENH,
+                            LOC_ADMIN,
+                            LOC_COUNT
+                          },
+        [LOC_GREENH]     = { LOC_OFFICE, LOC_COUNT },
+        [LOC_ADMIN]      = { LOC_OFFICE, LOC_COUNT },     
+};
