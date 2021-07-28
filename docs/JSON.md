@@ -221,7 +221,7 @@ A successful response from the server may look like this:
 			"Reactor"
 		]
 	}
-
+}
 ```
 
 A failed response from the server will look like this:
