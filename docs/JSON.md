@@ -29,7 +29,7 @@
 * `player`: the name of the player who left
 
 ### `chat`
-* `debug`: a debug message
+
 * `chat`: a message from another player
 
 ## Response and Message Type Arguments
@@ -123,7 +123,6 @@ A server response with the `greeting` type means the name was chosen successfull
 
 ### Message
 
-A typical message JSON object would look like this:
 A typical message JSON object would look like this:
 
 ```json
