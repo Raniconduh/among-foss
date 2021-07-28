@@ -4,6 +4,14 @@ A recreation of Among Us mechanics but as a multiplayer text adventure game inst
 
 ## Building
 
+Both make and meson are supported build systems. The server depends only on the json-c library. To build:
+
+```shell-session
+$ make
+```
+
+or
+
 ```shell-session
 $ meson build
 $ ninja -C build

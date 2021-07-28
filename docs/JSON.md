@@ -29,6 +29,25 @@
 * `player`: the name of the player who left
 
 ### `chat`
+* `debug`: a debug message
+* `chat`: a message from another player
+
+## Response and Message Type Arguments
+
+### name
+
+* `name`: the name the responses and messages are in relation to
+
+### message
+
+* `message`: the actual message
+
+### join
+
+* `player`: the name of the player who joined
+
+
+### chat
 
 * `player`: the player the message is from
 * `message`: the actual message the player sent
@@ -104,6 +123,7 @@ A server response with the `greeting` type means the name was chosen successfull
 
 ### Message
 
+A typical message JSON object would look like this:
 A typical message JSON object would look like this:
 
 ```json
