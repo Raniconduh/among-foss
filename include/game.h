@@ -6,6 +6,7 @@
 
 #include "util.h"
 #include "server.h"
+#include "task.h"
 #include "client.h"
 
 
@@ -27,3 +28,8 @@ struct game_state {
 
 
 extern struct game_state state;
+
+
+int choose_impostor();
+
+void start_game();
