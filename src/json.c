@@ -57,7 +57,7 @@ struct json_object *get_argument(struct json_object *object, char *key) {
 	return temp2;
 }
 
-int is_type(struct json_object *object, char *type) {
+char *get_type(struct json_object *object) {
 	struct json_object *type_object;
 	char *type_string;
 
@@ -65,26 +65,28 @@ int is_type(struct json_object *object, char *type) {
 
 	/* If the type is not valid, return. */
 	if (!is_valid_json(type_object))
-		return 0;
+		return NULL;
 
 	/* If the type is not a string, return. */
 	if (!json_object_is_type(type_object, json_type_string))
-		return 0;
+		return NULL;
 
 	type_string = (char *) json_object_get_string(type_object);
+	return type_string;
+}
 
-	/* If the type matches, return true. */
-	if (strcmp(type, type_string) == 0)
+int is_type(struct json_object *object, char *type) {
+	char *type_string = get_type(object);
+
+	/* If the type string matches and is not NULL, return true. */
+	if (type_string != NULL && strcmp(type, type_string) == 0)
 		return 1;
 
 	return 0;
 }
 
 int is_valid_json(struct json_object *object) {
-	if (json_object_is_type(object, json_type_null))
-		return 0;
-
-	return 1;
+	return !json_object_is_type(object, json_type_null);
 }
 
 /* Convert a JSON object into a string. */
@@ -99,7 +101,7 @@ char *convert_json_object_to_string(json_object *object) {
 json_object *convert_string_to_json_object(char *data) {
 	json_object *parsed_data = json_tokener_parse(data);
 
-	if(parsed_data != NULL)
+	if (parsed_data != NULL)
 		return parsed_data;
 	else
 		return NULL;

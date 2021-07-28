@@ -16,6 +16,8 @@ struct json_object *create_bool_argument_pair(char *key, int value);
 
 struct json_object *get_argument(struct json_object *object, char *key);
 
+char *get_type(struct json_object *object);
+
 int is_type(struct json_object *object, char *type);
 
 int is_valid_json(struct json_object *object);

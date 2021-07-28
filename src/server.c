@@ -14,6 +14,8 @@ void send_data(int fd, char *format, ...) {
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
+	printf("%d> %s", get_pid_by_fd(fd), buf);
+
 	write(fd, buf, strlen(buf));
 }
 
@@ -51,6 +53,7 @@ void broadcast_json(int sender_fd, json_object *object) {
 		send_json_data(players[pid].fd, object);
 	}
 }
+
 
 void start_server(uint16_t port) {
 	int listen_fd, new_fd, i;
