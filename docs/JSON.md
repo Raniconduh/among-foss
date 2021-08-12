@@ -34,20 +34,20 @@
 
 ## Response and Message Type Arguments
 
-### name
+### `name`
 
 * `name`: the name the responses and messages are in relation to
 
-### message
+### `message`
 
 * `message`: the actual message
 
-### join
+### `join`
 
 * `player`: the name of the player who joined
 
 
-### chat
+### `chat`
 
 * `player`: the player the message is from
 * `message`: the actual message the player sent
@@ -60,7 +60,7 @@
 ### `tasks`
 
 * `tasks`: an array of task names
-->	* an array with a `name` (string), `location` (string) and `done` (boolean) object
+	-> an array with a `name` (string), `location` (string) and `done` (boolean) object
 
 ### `set_location`
 
@@ -317,12 +317,10 @@ A successful response from the server may look like this:
 {
 	"status": 1,
 	"type": "tasks",
-	"arguments": {
-		"tasks": [
-			{ "name": "Fix wiring", "location": "MedBay", "done": true },
-			{ "name": "Swipe card", "location": "Admin", "done": false }
-		]
-	}
+	"arguments": [
+		{ "name": "Fix wiring", "location": "MedBay", "done": true },
+		{ "name": "Swipe card", "location": "Admin", "done": false }
+	]
 }
 ```
 
