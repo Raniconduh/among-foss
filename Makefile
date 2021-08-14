@@ -6,7 +6,7 @@ CFLAGS=$(shell pkg-config --cflags json-c) -I$(INCLUDEDIR)
 LIBS=$(shell pkg-config --libs json-c)
 SOURCES=src/*.c
 BUILDIR=build/src
-NAME=among-sus
+NAME=among-foss
 
 all: $(SOURCES)
 	mkdir -p $(BUILDIR) &> /dev/null
