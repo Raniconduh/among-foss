@@ -30,6 +30,10 @@ struct game_state {
 extern struct game_state state;
 
 
+int check_win_condition();
+
 int choose_impostor();
 
 void start_game();
+
+void end_game(enum json_game_status winner);

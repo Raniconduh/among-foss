@@ -11,6 +11,7 @@
 #include "location.h"
 #include "task.h"
 #include "json.h"
+#include "packet.h"
 
 
 #define NUM_PLAYERS 10 /* Maximum amount of players */
@@ -36,7 +37,7 @@ struct player {
 	int fd;
 
 	int is_impostor;
-	int has_cooldown;
+	int cooldown;
 
 	struct task *tasks[NUM_TASKS];
 	int tasks_done[NUM_TASKS];
@@ -50,10 +51,14 @@ struct player {
 
 int get_pid_by_fd(int fd);
 
+struct player *get_player_by_name(char *name);
+
+int is_alive(struct player *player);
+
+int kill_player(struct player *player, struct player *target);
+
 int welcome_client(int fd);
 
-void disconnect_client(int fd, int pid, int should_broadcast);
-
-int handle_packet(int pid, char *type, struct json_object *object);
+void disconnect_client(struct player *player, int should_broadcast);
 
 int handle_input(int fd);

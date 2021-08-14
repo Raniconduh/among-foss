@@ -12,137 +12,101 @@ int get_pid_by_fd(int fd) {
 	return -1;
 }
 
-/* Greet the client and ask them for their name. */
+/* Get a player using their name. */
+struct player *get_player_by_name(char *name) {
+	for (int pid = 0; pid < NUM_PLAYERS; pid++)
+		if (strcmp(name, players[pid].name) == 0)
+			return &players[pid];
+	
+	/* If no player could be found, return a NULL pointer. */
+	return NULL;
+}
+
+int is_alive(struct player *player) {
+	return player->state == PLAYER_STATE_ALIVE;
+}
+
+void notify_kill(struct player *target) {
+	for (int i = 0; i < NUM_PLAYERS; i++) {
+		struct player *player = &players[i];
+		if (player == target || player->fd == -1 || !is_alive(player)
+				|| player->location != target->location
+				|| player->stage != PLAYER_STAGE_MAIN) 
+			continue;
+
+		send_json_data(player->fd, JSON_PLAYER_STATUS(JSON_PLAYER_STATUS_KILL, target->name));
+	}
+}
+
+int kill_player(struct player *player, struct player *target) {
+	if (target == NULL || player == NULL
+			|| target->stage != PLAYER_STAGE_MAIN
+			|| target->state != PLAYER_STATE_ALIVE)
+		return JSON_KILL_INVALID_PLAYER;
+
+	/* If the player is not the impostor. */
+	if (!player->is_impostor || target->is_impostor)
+		return JSON_KILL_NOT_IMPOSTOR;
+
+	/* If the impostor still has a kill cooldown. */
+	if (player->cooldown != 0)
+		return JSON_KILL_COOLDOWN;
+
+	/* If the target and the player are not in the same room. */
+	if (player->location != target->location)
+		return JSON_KILL_NOT_IN_ROOM;
+
+	target->state = PLAYER_STATE_DEAD;
+	send_json_data(target->fd, JSON_DEATH(JSON_DEATH_KILL));
+
+	/* Notify the players in the room about the kill
+	 * and check the win condition. */
+	notify_kill(target);
+	check_win_condition();
+
+	/* Reset the kill cooldown. */
+	player->cooldown = KILL_COOLDOWN;
+
+	return 0;
+}
+
+/* Greet the client. */
 int welcome_client(int fd) {
+	send_json_data(fd, JSON_INFO);
+
 	for (int i = 0; i < sizeof(players); i++) {
 		if (players[i].fd > 0)
 			continue;
-
-		send_json_data(fd, JSON_INFO);
-
-		if (state.stage != STAGE_LOBBY)
-			broadcast_json(-1, JSON_GAME_STATUS(JSON_GAME_STATUS_IN_PROGRESS));
 
 		players[i].fd = fd;
 		players[i].stage = PLAYER_STAGE_NAME;
 
 		printf("Assigned player to ID %d\n", i);
 
+		if (state.stage != STAGE_LOBBY)
+			send_json_data(players[i].fd, JSON_GAME_STATUS(JSON_GAME_STATUS_IN_PROGRESS));
+
 		return 0;
 	}
 
 	/* Tell the client that the game is full and close the file descriptor. */
-	send_json_data(fd, JSON_KICK(JSON_KICK_GAME_FULL));
+	send_json_data(fd, JSON_GAME_STATUS(JSON_GAME_STATUS_FULL));
 	close(fd);
 
 	return -1;
 }
 
 /* Clean the player's info. */
-void disconnect_client(int fd, int pid, int should_broadcast) {
-	players[pid].fd = -1;
+void disconnect_client(struct player *player, int should_broadcast) {
+	player->fd = -1;
 
 	if (should_broadcast)
-		broadcast_json(-1, JSON_LEAVE(players[pid].name));
+		broadcast_json(-1, JSON_PLAYER_STATUS(JSON_PLAYER_STATUS_LEAVE, player->name));
 
-	/* TODO: Reset the game if no more players are in the game
-	 * TODO: Check the win condition */
+	/* This will check whether the impostor left or not enough crewmates are left. */
+	check_win_condition();
 
-	players[pid].name[0] = '\0';
-}
-
-/* Handle a specific packet type.
- * Returns if it was actually an existing packet. */
-int handle_packet(int pid, char *type, struct json_object *object) {
-	struct player *player = &players[pid];
-	int fd = player->fd;
-
-	/* To get the current location */
-	if (strcmp("location", type) == 0) {
-
-		if (player->stage == PLAYER_STAGE_MAIN) {
-			struct json_object *args = json_object_new_object(), *doors_array = json_object_new_array();
-
-			struct location *player_location = player->location;
-			int doors_size = sizeof *player_location->doors / sizeof(struct location *);
-			
-			for (int i = 0; i < doors_size; i++) {
-				struct location *door = player_location->doors[i];	
-				json_object_array_add(doors_array, json_object_new_string(door->name));
-			}
-
-			json_object_object_add(args, "name", json_object_new_string(players[pid].location->name));
-			json_object_object_add(args, "doors", doors_array);
-
-			send_json_data(fd, JSON_LOCATION(1, args));
-			return 1;
-		} else
-			send_json_data(fd, JSON_LOCATION(0, NULL));
-
-	/* To get a list of tasks */
-	} else if (strcmp("tasks", type) == 0) {
-
-		if (player->stage == PLAYER_STAGE_MAIN) {
-			struct json_object *task_list = json_object_new_array();
-
-			for (int i = 0; i < NUM_TASKS; i++) {
-				struct json_object *task_object = json_object_new_object();
-				struct task *task = player->tasks[i];
-
-				json_object_object_add(task_object, "description", json_object_new_string(task->description));
-				json_object_object_add(task_object, "location", json_object_new_string(task->location->name));
-				json_object_object_add(task_object, "done", json_object_new_boolean(player->tasks_done[i]));
-
-				json_object_array_add(task_list, task_object);
-			}
-
-			send_json_data(fd, JSON_TASKS(1, task_list));
-			return 1;
-		} else
-			send_json_data(fd, JSON_TASKS(0, NULL));
-
-	/* To complete a task */
-	} else if (strcmp("do_task", type) == 0) {
-
-		/* TODO: Implement */
-
-	/* To change the location */
-	} else if (strcmp("set_location", type) == 0) {
-
-		if (player->stage == PLAYER_STAGE_MAIN) {
-			struct location *location = player->location;
-
-			if (location != NULL) {
-				struct json_object *location_object = get_argument(object, "name");
-				struct location *new_location;
-				int success;
-				
-				if (location_object == NULL) {
-					send_json_data(fd, JSON_SET_LOCATION(JSON_SET_LOCATION_INVALID, NULL));
-					return 0;
-				}
-
-				new_location = parse_location_name((char *) json_object_get_string(location_object));
-
-				if (new_location == NULL) {
-					send_json_data(fd, JSON_SET_LOCATION(JSON_SET_LOCATION_INVALID, NULL));
-					return 0;
-				}
-
-				success = move_player(pid, new_location);
-
-				if (success) {
-					send_json_data(fd, JSON_SET_LOCATION(JSON_SET_LOCATION_SUCCESS, create_string_argument_pair("name", new_location->name)));
-					return 1;
-				} else
-					send_json_data(fd, JSON_SET_LOCATION(JSON_SET_LOCATION_ALREADY_CURRENT, NULL));
-			}
-		} else
-			send_json_data(fd, JSON_SET_LOCATION(JSON_SET_LOCATION_NOT_IN_GAME, NULL));
-
-	}
-
-	return 0;
+	player->name[0] = '\0';
 }
 
 /* Handle client input. */
@@ -152,15 +116,16 @@ int handle_input(int fd) {
 	struct json_object *parsed_input, *arg;
 
 	int pid = get_pid_by_fd(fd);
+	struct player *player = &players[pid];
 	int len;
 
 	/* Get the input. */
 	len = read(fd, input, INPUT_MAX - 1);
 
 	/* If the client sends an invalid length, disconnect them. */
-	if (len < 0 || len > INPUT_MAX) {
+	if (len < 0 || len >= INPUT_MAX) {
 		printf("Read error from player %d\n", pid);
-		disconnect_client(fd, pid, players[pid].stage != PLAYER_STAGE_NAME);
+		disconnect_client(player, players[pid].stage != PLAYER_STAGE_NAME);
 
 		return -1;
 
@@ -169,7 +134,7 @@ int handle_input(int fd) {
 	/* If the client sends an EOF, disconnect them. */
 	if (len == 0) {
 		printf("Received EOF from player %d\n", pid);
-		disconnect_client(fd, pid, players[pid].stage != PLAYER_STAGE_NAME);
+		disconnect_client(player, players[pid].stage != PLAYER_STAGE_NAME);
 
 		return -2;
 	}
@@ -189,7 +154,7 @@ int handle_input(int fd) {
 
 	/* If the parsed JSON object is null (indicating that the sent data was
 	 * not actually JSON or malformed JSON), return. */
-	if (!is_valid_json(parsed_input)) {
+	if (parsed_input == NULL || json_object_get_type(parsed_input) != json_type_object) {
 		printf("Player %d sent invalid JSON\n", pid);
 		return 0;
 	}
@@ -200,10 +165,8 @@ int handle_input(int fd) {
 		return 0;
 
 	/* These are special packets that I won't put in the packet handler. */
-	switch(players[pid].stage) {
-		case PLAYER_STAGE_NAME:;
-			char *name;
-
+	switch(player->stage) {
+		case PLAYER_STAGE_NAME:
 			if (!is_type(parsed_input, "name"))
 				return 0;
 
@@ -212,7 +175,7 @@ int handle_input(int fd) {
 			if (!is_valid_json(arg))
 				return 0;
 
-			name = (char *) json_object_get_string(arg);
+			char *name = (char *) json_object_get_string(arg);
 
 			/* Check if the entered name is valid. */
 			if (!is_valid_name(name, fd))
@@ -221,25 +184,23 @@ int handle_input(int fd) {
 			strcpy(players[pid].name, name);
 
 			if (state.stage == STAGE_LOBBY) {
-				players[pid].stage = PLAYER_STAGE_LOBBY;
-				broadcast_json(fd, JSON_JOIN(players[pid].name));
+				player->stage = PLAYER_STAGE_LOBBY;
+				broadcast_json(fd, JSON_PLAYER_STATUS(JSON_PLAYER_STATUS_JOIN, players[pid].name));
 			}
 
 			/* Greet the client. */
-			send_json_data(players[pid].fd, JSON_GREETING);
+			send_json_data(fd, JSON_NAME(JSON_NAME_SUCCESS));
 
 			break;
 
 		case PLAYER_STAGE_LOBBY:
 			if (is_type(parsed_input, "message")) {
-				char *message;
 				arg = get_argument(parsed_input, "message");
 
 				if (!is_valid_json(arg))
 					return 0;
 
-				message = (char *) json_object_get_string(arg);
-
+				char *message = (char *) json_object_get_string(arg);
 				int valid = 0;
 
 				for (size_t i = 0; i < strlen(message); i++)
@@ -248,40 +209,11 @@ int handle_input(int fd) {
 
 				struct json_object *args = json_object_new_object();
 
-				json_object_object_add(args, "player", json_object_new_string(players[pid].name));
+				json_object_object_add(args, "player", json_object_new_string(player->name));
 				json_object_object_add(args, "message", json_object_new_string(message));
 
 				if (valid)
 					broadcast_json(fd, JSON_CHAT(message, args));
-			} else if (is_type(parsed_input, "command")) {
-				printf("b\n");
-
-				struct json_object *command = get_argument(parsed_input, "command");
-				struct json_object *arguments = get_argument(parsed_input, "arguments");
-
-				/* If no "command" or "arguments" arguments were given, return. */
-				if (command == NULL || arguments == NULL)
-					return 0;
-
-				/* If the arguments are not the correct type, return. */
-				if (json_object_get_type(command) != json_type_string
-						|| json_object_get_type(arguments) != json_type_array)
-					return 0;
-
-				char *string_command = (char *) json_object_get_string(command);
-				char *string_arguments[10];
-
-				for (int i = 0; i < json_object_array_length(arguments); i++) {
-					struct json_object *argument = json_object_array_get_idx(arguments, i);
-
-					if (argument == NULL
-							|| json_object_get_type(argument) != json_type_string)
-						continue;
-
-					string_arguments[i] = (char *) json_object_get_string(argument);
-				}
-
-				parse_command(pid, string_command, string_arguments);
 			}
 
 			break;

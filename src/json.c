@@ -64,7 +64,7 @@ char *get_type(struct json_object *object) {
 	json_object_object_get_ex(object, "type", &type_object);
 
 	/* If the type is not valid, return. */
-	if (!is_valid_json(type_object))
+	if (!is_valid_json(object))
 		return NULL;
 
 	/* If the type is not a string, return. */
@@ -100,9 +100,5 @@ char *convert_json_object_to_string(json_object *object) {
 /* Convert a string into a JSON object. */
 json_object *convert_string_to_json_object(char *data) {
 	json_object *parsed_data = json_tokener_parse(data);
-
-	if (parsed_data != NULL)
-		return parsed_data;
-	else
-		return NULL;
+	return parsed_data;
 }

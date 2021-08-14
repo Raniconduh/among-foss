@@ -14,8 +14,6 @@ void send_data(int fd, char *format, ...) {
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
-	printf("%d> %s", get_pid_by_fd(fd), buf);
-
 	write(fd, buf, strlen(buf));
 }
 

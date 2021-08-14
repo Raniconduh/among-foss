@@ -7,13 +7,14 @@ sources = files(
 	'chat.c',
 	'json.c',
 	'task.c',
-	'location.c'
+	'location.c',
+	'packet.c'
 )
 
 include = include_directories('../include/')
 
 executable(
-	'among-sus',
+	'among-foss',
 	[sources],
 	include_directories: include,
 	dependencies: dependencies,

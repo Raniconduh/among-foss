@@ -12,5 +12,3 @@
 char *sanitize(char *input);
 
 int is_valid_name(char *name, int fd);
-
-void parse_command(int pid, char *command, char *arguments[]);

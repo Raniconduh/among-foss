@@ -3,36 +3,17 @@
 ## Response and Message Types
 
 * `info`: information
-* `greeting`: a hello from the server
 * `name`: responses and messages relating to user names
-* `message`: commands and chat messages
-* `join`: a player joined the server
+* `message`: chat messages
+* `player_status`: status of a player
 * `chat`: a message from another player
 * `tasks`: list of tasks
 
 ## Response and Message Type Arguments
 
-### `name`
+### `info`
 
-* `name`: the name the responses and messages are in relation to
-
-### `message`
-
-* `message`: the actual message
-
-### `join`
-
-* `player`: the name of the player who joined
-
-### `leave`
-
-* `player`: the name of the player who left
-
-### `chat`
-
-* `chat`: a message from another player
-
-## Response and Message Type Arguments
+* `version`: server version
 
 ### `name`
 
@@ -42,10 +23,9 @@
 
 * `message`: the actual message
 
-### `join`
+### `player_status`
 
 * `player`: the name of the player who joined
-
 
 ### `chat`
 
@@ -59,16 +39,25 @@
 
 ### `tasks`
 
-* `tasks`: an array of task names
-	-> an array with a `name` (string), `location` (string) and `done` (boolean) object
+* `arguments` is an array, each object has a `name` (string), `location` (string) and `done` (boolean) object
 
 ### `set_location`
 
 * `name`: the name of the new location
 
-## Examples and Other Information
+### `kill`
 
-### Name
+* `name`: name of the player that got killed
+
+### `vote`
+
+* `name`: name of the player that got voted
+
+# Examples and Other Information
+
+# Connecting
+
+### Info
 
 On connection, the server will send out a JSON object with the server version like so:
 
@@ -90,9 +79,18 @@ The server may send an object informing the client that a game is currently in p
 }
 ```
 
-Please refer to the Game status category for the status code descriptions.
+If that is not the case, it may send an object indicating that the game is full and close the file descriptor:
 
-A client will then send a JSON object detailing the name the player has chosen. The object may look like this:
+```json
+{
+	"status": 2,
+	"type": "game_status"
+}
+```
+
+Please refer to the `game_status` section for the status code descriptions.
+
+A client will then need to send a JSON object detailing the name it has chosen. The object may look like this:
 
 ```json
 {
@@ -103,23 +101,58 @@ A client will then send a JSON object detailing the name the player has chosen. 
 }
 ```
 
+All printable characters (validated using `isprint()`) are allowed.
+
 This will ask the server to set the client's name to `my_name`. In response, the server will send a JSON object like this:
 
 ```json
 {
 	"status": 1,
-	"type": "greeting"
+	"type": "name"
 }
 ```
 
 Name setting status codes work as such:
 
-* `0`: Too short
-* `1`: Too long
-* `2`: Invalid
-* `3`: Taken
+* `0`: Success
+* `1`: Too short
+* `2`: Too long
+* `3`: Invalid
+* `4`: Taken
 
-A server response with the `greeting` type means the name was chosen successfully. Otherwise it is an error.
+A server response with the `name` type and status code of `0` means the name was chosen successfully. Otherwise it is an error.
+
+## Game
+
+As soon as someone in the server starts the game and more than 2 players are connected, the game still start.
+
+The players will get sent `game_status` with a status of `0` (Start) to indicate that the game is starting.
+
+Then players will get sent `player_type` with their role. (`0` (Crewmate) or `1` (Impostor))
+
+### Player Status
+
+Whenever a player leaves/joins/gets kicked/etc. the server will send a `player_status` object which may look like this:
+
+```json
+{
+	"status": 1,
+	"type": "player_status",
+	"arguments": {
+		"player": "someone"
+	}
+}
+```
+
+The status codes mean the following:
+
+* `0`: Leave
+* `1`: Join
+* `2`: Room Leave
+* `3`: Room Enter
+* `4`: Body (gets sent when you enter a room with a body)
+* `5`: Kill (was killed by the impostor in the current room)
+* `5`: Vote (voted out by discussion)
 
 ### Message
 
@@ -134,6 +167,8 @@ A typical message JSON object would look like this:
 }
 ```
 
+All printable characters (validated using `isprint()`) are allowed.
+
 Other players in the server will get an object like this:
 
 ```json
@@ -147,32 +182,6 @@ Other players in the server will get an object like this:
 }
 ```
 
-Commands are handled through a separate object.
-
-### Command
-
-A typical command JSON object would look like this:
-
-```json
-{
-	"type": "command",
-	"arguments": {
-		"command": "start",
-		"arguments": [
-			"foo",
-			"bar"
-		]
-	}
-}
-```
-
-## Game
-As soon as someone in the server enters starts the game and more than 2 players are connected, the game still start.
-
-The players will get sent `game_status` with a status of `0` (Start) to indicate that the game is starting.
-
-Then players will get sent `player_type` with their role. (`0` (Crewmate) or `1` (Impostor))
-
 ### Game Status
 
 Game status codes work as such:
@@ -181,15 +190,16 @@ A message of this type from the server may look like this:
 
 ```json
 {
-	"status": 2,
+	"status": 3,
 	"type": "game_status"
 }
 ```
 
-* `0`: Start (sent when the `/start` command is executed)
-* `1`: Game in Progress (sent after `info` if a game is currently in progress)
-* `2`: Crew won (sent after the game finished and the crew won)
-* `3`: Impostor won (sent after the game finished and the impostor won)
+* `0`: Start (sent when the game started)
+* `1`: In Progress (sent after `info` if a game is currently in progress)
+* `2`: Full (sent after `info` if the game is full)
+* `3`: Crew won (sent after the game finished and the crew won)
+* `4`: Impostor won (sent after the game finished and the impostor won)
 
 ### Player Type
 
@@ -211,6 +221,18 @@ Player type status codes work as such:
 * `0`: Crewmate
 * `1`: Impostor
 * `2`: Ghost (only gets sent after being killed by the impostor)
+
+### Start Game
+
+If the current game state is not `lobby` or `discussion`, sending the `start_game` event as a client will start the game.
+
+A request from the client should look like this:
+
+```json
+{
+	"type": "start_game"
+}
+```
 
 ### Location
 
@@ -293,8 +315,8 @@ A failed response from the server may look like this:
 The status codes mean the following:
 
 * `0`: Success
-* `1`: Not in game
-* `2`: Invalid
+* `1`: Invalid
+* `2`: Not possible
 * `3`: Already current
 
 ### Tasks
@@ -359,7 +381,73 @@ The server may send a response like this:
 The status codes mean the following:
 
 * `0`: Success
-* `1`: Not in game
-* `2`: Already completed
-* `3`: Wrong location
-* `4`: Doesn't exist
+* `1`: Already completed
+* `2`: Wrong location
+* `3`: Doesn't exist
+
+### Kill
+
+Only possible during the game. The player also needs to be the impostor.
+
+As a client, send a request looking like this:
+
+```json
+{
+	"type": "kill",
+	"arguments": {
+		"name": "target"
+	}
+}
+```
+
+The server may send a response like this:
+
+```json
+{
+	"status": 1,
+	"type": "kill",
+	"arguments": {
+		"name": "target"
+	}
+}
+```
+
+The `target` argument is only given if it was successful.
+
+The status codes mean the following:
+
+* `0`: Success
+* `1`: Not in room
+* `2`: Cooldown
+* `3`: Invalid Player (player doesn't exist, not in game)
+* `4`: Not Impostor (the sender is not the impostor)
+
+All the players in the room where the kill happened will get an object looking like this:
+
+```json
+{
+	"status": 3,
+	"type": "player_status",
+	"arguments": {
+		"player": "someone"
+	}
+}
+```
+
+Refer to the `player_status` section for more information about the status codes.
+
+### Death
+
+Will only get sent to a client. The JSON object may look like this:
+
+```json
+{
+	"status": 0,
+	"type": "death"
+}
+```
+
+The status codes mean the following:
+
+* `0`: Kill (killed by the impostor)
+* `1`: Vote (voted out by discussion)

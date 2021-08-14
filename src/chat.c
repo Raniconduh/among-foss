@@ -40,24 +40,3 @@ int is_valid_name(char *name, int fd) {
 
 	return 1;
 }
-
-/* Parse user input and do respective actions if it is a command. */
-void parse_command(int pid, char *command, char *arguments[]) {
-	/* If the command is nothing, return. */
-	if (strlen(command) <= 0)
-		return;
-
-	switch (state.stage) {
-		case STAGE_LOBBY:
-			if (strcmp("start", command) == 0)
-				start_game();
-
-			break;
-
-		case STAGE_PLAYING:
-			break;
-
-		case STAGE_DISCUSS:
-			break;
-	}
-}

@@ -6,13 +6,13 @@
 #include "location.h"
 
 
-#define NUM_TASKS 1 /* Amount of tasks a player gets */
+#define NUM_TASKS 5 /* Amount of tasks a player gets */
 
 
 enum task_id {
 	TASK_CAFE_TRASH,
 	TASK_CAFE_COFFEE,
-	/*TASK_CAFE_WIRES,
+	TASK_CAFE_WIRES,
 	TASK_STORAGE_TRASH,
 	TASK_STORAGE_WIRES,
 	TASK_STORAGE_CLEAN,
@@ -28,12 +28,12 @@ enum task_id {
 	TASK_SHIELDS_WIRES,
 	TASK_O2_WIRES,
 	TASK_O2_CLEAN,
-	TASK_OS_WATER,
+	TASK_O2_WATER,
 	TASK_MEDBAY_WIRES,
 	TASK_UPPER_CATALYZER,
 	TASK_LOWER_CATALYZER,
 	TASK_UPPER_COMPRESSION_COIL,
-	TASK_LOWER_COMPRESSION_COIL,*/
+	TASK_LOWER_COMPRESSION_COIL,
 	TASK_COUNT
 };
 
@@ -47,4 +47,10 @@ struct task {
 extern struct task tasks[];
 
 
+int get_task_id(int pid, struct task *task);
+
+struct task *get_task_by_description(char *description, struct location *location);
+
 void assign_tasks(int pid);
+
+int do_task(int pid, struct task *task);
