@@ -1,19 +1,30 @@
 .POSIX:
 
-CC=cc
-INCLUDEDIR=include
-CFLAGS=$(shell pkg-config --cflags json-c) -I$(INCLUDEDIR)
-LIBS=$(shell pkg-config --libs json-c)
-SOURCES=src/*.c
-BUILDIR=build/src
-NAME=among-foss
+CC?=	cc
+CFLAGS+= $(shell pkg-config --cflags json-c) -Iinclude
+LIBS+=	$(shell pkg-config --libs json-c)
+SRCS:=	$(wildcard src/*.c)
+BUILD=	build/src
+NAME:=	$(BUILD)/among-foss
+OBJS:=	$(patsubst src/%.c,build/src/%.o,$(SRCS))
 
-all: $(SOURCES)
-	mkdir -p $(BUILDIR) &> /dev/null
-	$(CC) $(CFLAGS) -o $(BUILDIR)/$(NAME) $(SOURCES) $(LIBS)
+PREFIX?= /usr/local
+
+.PHONY: all install uninstall clean
+
+all: build $(NAME)
+
+build:
+	mkdir -p $(BUILD) 2>/dev/null
+
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+build/src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
-	install $(BUILDIR)/$(NAME) $(DESTDIR)/$(PREFIX)/bin
+	install $(BUILD)/$(NAME) $(DESTDIR)/$(PREFIX)/bin/$(NAME)
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/bin/$(NAME)
