@@ -25,14 +25,19 @@ int main(int argc, char *argv[]) {
 	int ch;
 	while ((ch = getopt(argc, argv, "hp:")) != -1) {
 		switch (ch) {
-		case 'p':
-			port = strtol(argv[optind - 1], NULL, 0);
-			if (errno == ERANGE) {
-				printf("Truncating port to %hu\n", port);
-			} else if (errno == EINVAL) {
+		case 'p':;
+			uint32_t t_port;
+			t_port = strtod(argv[optind - 1], NULL);
+			if (errno == EINVAL) {
 				fputs("Invalid port\n", stderr);
 				exit(1);
 			}
+
+			if (t_port >= (2<<15)) {
+				fputs("Port out of range\n", stderr);
+				exit(1);
+			}
+			port = t_port;
 			break;
 		case '?':
 		case 'h':
