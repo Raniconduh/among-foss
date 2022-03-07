@@ -1,11 +1,9 @@
-.POSIX:
-
 CC?=	cc
 CFLAGS+= $(shell pkg-config --cflags json-c) -Iinclude
 LIBS+=	$(shell pkg-config --libs json-c)
 SRCS:=	$(wildcard src/*.c)
 BUILD=	build/src
-NAME:=	$(BUILD)/among-foss
+NAME:=	among-foss
 OBJS:=	$(patsubst src/%.c,build/src/%.o,$(SRCS))
 
 PREFIX?= /usr/local
@@ -18,7 +16,7 @@ build:
 	mkdir -p $(BUILD) 2>/dev/null
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) -o $(BUILD)/$@ $^ $(LIBS)
 
 build/src/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
